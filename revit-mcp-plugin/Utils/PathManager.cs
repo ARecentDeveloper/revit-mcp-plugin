@@ -62,6 +62,21 @@ namespace revit_mcp_plugin.Utils
 
             return registryFilePath;
         }
+
+        public static string GetCommandDataFilePath(bool createIfNotExists = true)
+        {
+            string commandsDirectory = GetCommandsDirectoryPath();
+            string commandDataFilePath = Path.Combine(commandsDirectory, "commandData.json");
+
+            if(createIfNotExists && !File.Exists(commandDataFilePath))
+            {
+                CreateDefaultCommandDataFile(commandDataFilePath);
+            }
+
+            return commandDataFilePath;
+        }
+
+
         /// <summary>
         /// Creates a default command registry file with empty commands array
         /// </summary>
@@ -80,6 +95,23 @@ namespace revit_mcp_plugin.Utils
                 Console.WriteLine($"Error creating default command registry file: {ex.Message}");
             }
         }
+
+        private static void CreateDefaultCommandDataFile(string filePath)
+        {
+            try
+            {
+                var defaultRegistry = new { commandSets = new object[] { } };
+                string jsonContent = JsonConvert.SerializeObject(defaultRegistry, Formatting.Indented);
+
+                File.WriteAllText(filePath, jsonContent);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating default command registry file: {ex.Message}");
+            }
+        }
+
+
         /// <summary>
         /// Ensures that the specified directory exists
         /// </summary>

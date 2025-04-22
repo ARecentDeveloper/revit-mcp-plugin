@@ -21,6 +21,7 @@ namespace revit_mcp_plugin.UI
     public partial class SettingsWindow : Window
     {
         private CommandSetSettingsPage commandSetPage;
+        private CommandManager commandManagerPage;
         private bool isInitialized = false;
 
         public SettingsWindow()
@@ -29,6 +30,9 @@ namespace revit_mcp_plugin.UI
 
             // 初始化页面
             commandSetPage = new CommandSetSettingsPage();
+
+            // 管理页
+            commandManagerPage = new CommandManager();
 
             // 加载默认页面
             ContentFrame.Navigate(commandSetPage);
@@ -43,6 +47,9 @@ namespace revit_mcp_plugin.UI
             if (NavListBox.SelectedItem == CommandSetItem)
             {
                 ContentFrame.Navigate(commandSetPage);
+            }else if(NavListBox.SelectedItem == CommandManagerItem)
+            {
+                ContentFrame.Navigate(commandManagerPage);
             }
         }
     }
