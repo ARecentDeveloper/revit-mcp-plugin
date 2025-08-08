@@ -54,15 +54,18 @@ namespace revit_mcp_plugin.Core
                 return wrapper.Event;
             }
 
-            // 需要在UI线程中创建事件
+            // 直接创建外部事件 - 这应该在主线程中工作
             ExternalEvent externalEvent = null;
-
-            // 使用活动文档的上下文执行创建事件的操作
-            _uiApp.ActiveUIDocument.Document.Application.ExecuteCommand(
-                (uiApp) => {
-                    externalEvent = ExternalEvent.Create(handler);
-                }
-            );
+            
+            try
+            {
+                externalEvent = ExternalEvent.Create(handler);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"创建外部事件失败: {ex.Message}");
+                throw new InvalidOperationException($"无法创建外部事件: {ex.Message}");
+            }
 
             if (externalEvent == null)
                 throw new InvalidOperationException("无法创建外部事件");
@@ -95,19 +98,3 @@ namespace revit_mcp_plugin.Core
     }
 }
 
-namespace Autodesk.Revit.DB
-{
-    public static class ApplicationExtensions
-    {
-        public delegate void CommandDelegate(UIApplication uiApp);
-
-        /// <summary>
-        /// 在 Revit 上下文中执行命令
-        /// </summary>
-        public static void ExecuteCommand(this Autodesk.Revit.ApplicationServices.Application app, CommandDelegate command)
-        {
-            // 这个方法在 Revit 上下文中调用，可以安全地创建 ExternalEvent
-            command?.Invoke(new UIApplication(app));
-        }
-    }
-}
