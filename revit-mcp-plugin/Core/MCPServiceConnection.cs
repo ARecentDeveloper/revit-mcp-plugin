@@ -23,14 +23,14 @@ namespace revit_mcp_plugin.Core
                 {
                     logger.Info("MCPServiceConnection: Calling Stop()");
                     service.Stop();
-                    TaskDialog.Show("revitMCP", "Close Server");
+                    TaskDialog.Show("Revit MCP", "Server Stopped");
                 }
                 else
                 {
                     logger.Info("MCPServiceConnection: Calling Initialize() and Start()");
                     service.Initialize(commandData.Application);
                     service.Start();
-                    TaskDialog.Show("revitMCP", "Open Server");
+                    TaskDialog.Show("Revit MCP", "Server Started");
                 }
 
                 return Result.Succeeded;
