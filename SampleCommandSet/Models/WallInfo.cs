@@ -3,7 +3,7 @@
 namespace SampleCommandSet.Models
 {
     /// <summary>
-    /// 墙体信息结构，用于返回创建的墙的详细信息
+    /// Wall information structure used to return details of the created wall
     /// </summary>
     public class WallInfo
     {

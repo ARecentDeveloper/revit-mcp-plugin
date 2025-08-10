@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 namespace SampleCommandSet.Extensions
 {
     /// <summary>
-    /// 提供 Revit API 跨版本兼容性的扩展方法
+    /// Provides extension methods for Revit API cross-version compatibility
     /// </summary>
     public static class RevitApiCompatibilityExtensions
     {
-        // 缓存反射结果以提高性能
+        // Cache reflection results to improve performance
         private static readonly Lazy<PropertyInfo> ElementIdValueProperty =
             new Lazy<PropertyInfo>(() => typeof(ElementId).GetProperty("Value"));
 
@@ -21,14 +21,14 @@ namespace SampleCommandSet.Extensions
             new Lazy<PropertyInfo>(() => typeof(ElementId).GetProperty("IntegerValue"));
 
         /// <summary>
-        /// 以版本兼容的方式获取 ElementId 的整数值
+        /// Gets the integer value of ElementId in a version-compatible way
         /// </summary>
         public static int GetIdValue(this ElementId id)
         {
             if (id == null)
                 throw new ArgumentNullException(nameof(id));
 
-            // 先检查是否有 Value 属性 (Revit 2022+)
+            // First check if Value property exists (Revit 2022+)
             if (ElementIdValueProperty.Value != null)
             {
                 try
@@ -37,16 +37,16 @@ namespace SampleCommandSet.Extensions
                 }
                 catch
                 {
-                    // 失败时回退到 IntegerValue
+                    // Fall back to IntegerValue on failure
                 }
             }
 
-            // 使用 IntegerValue (旧版本 Revit)
+            // Use IntegerValue (older Revit versions)
             return id.IntegerValue;
         }
 
         /// <summary>
-        /// 获取文档当前 Revit 版本号
+        /// Gets the current Revit version number from the document
         /// </summary>
         public static int GetRevitVersionNumber(this Document doc)
         {

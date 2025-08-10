@@ -50,37 +50,37 @@ namespace revit_mcp_plugin.Core
             set => _port = value;
         }
 
-        // 初始化
+        // Initialize
         public void Initialize(UIApplication uiApp)
         {
             _uiApp = uiApp;
 
-            // 初始化事件管理器
+            // Initialize event manager
             ExternalEventManager.Instance.Initialize(uiApp, _logger);
 
-            // 记录当前 Revit 版本
+            // Log current Revit version
             var versionAdapter = new RevitMCPSDK.API.Utils.RevitVersionAdapter(_uiApp.Application);
             string currentVersion = versionAdapter.GetRevitVersion();
-            _logger.Info("当前 Revit 版本: {0}", currentVersion);
+            _logger.Info("Current Revit version: {0}", currentVersion);
 
 
 
-            // 创建命令执行器
+            // Create command executor
             _commandExecutor = new CommandExecutor(_commandRegistry, _logger);
 
-            // 加载配置并注册命令
+            // Load configuration and register commands
             ConfigurationManager configManager = new ConfigurationManager(_logger);
             configManager.LoadConfiguration();
             
 
-            //// 从配置中读取服务端口
+            //// Read service port from configuration
             //if (configManager.Config.Settings.Port > 0)
             //{
             //    _port = configManager.Config.Settings.Port;
             //}
-            _port = 8081; // 固定端口号 (避免与Revit内置服务冲突)
+            _port = 8081; // Fixed port number (avoid conflicts with Revit built-in services)
 
-            // 加载命令
+            // Load commands
             CommandManager commandManager = new CommandManager(
                 _commandRegistry, _logger, configManager, _uiApp);
             commandManager.LoadCommands();
@@ -92,39 +92,39 @@ namespace revit_mcp_plugin.Core
         {
             if (_isRunning) 
             {
-                _logger.Info("Socket服务已在运行中");
+                _logger.Info("Socket service is already running");
                 return;
             }
 
             try
             {
-                _logger.Info($"启动Socket服务，端口: {_port}");
+                _logger.Info($"Starting Socket service on port: {_port}");
                 _isRunning = true;
                 _listener = new TcpListener(IPAddress.Any, _port);
                 _listener.Start();
-                _logger.Info("TcpListener已启动");
+                _logger.Info("TcpListener started");
 
                 _listenerThread = new Thread(ListenForClients)
                 {
                     IsBackground = true
                 };
                 _listenerThread.Start();
-                _logger.Info("监听线程已启动");
+                _logger.Info("Listener thread started");
             }
             catch (Exception ex)
             {
-                _logger.Error($"启动Socket服务失败: {ex.Message}");
+                _logger.Error($"Failed to start Socket service: {ex.Message}");
                 
-                // 清理资源
+                // Clean up resources
                 try
                 {
                     _listener?.Stop();
                     _listener = null;
-                    _logger.Info("已清理TcpListener资源");
+                    _logger.Info("TcpListener resources cleaned up");
                 }
                 catch (Exception cleanupEx)
                 {
-                    _logger.Error($"清理资源时发生错误: {cleanupEx.Message}");
+                    _logger.Error($"Error occurred while cleaning up resources: {cleanupEx.Message}");
                 }
                 
                 _isRunning = false;
@@ -135,61 +135,61 @@ namespace revit_mcp_plugin.Core
         {
             if (!_isRunning) 
             {
-                _logger.Info("Socket服务未在运行中");
+                _logger.Info("Socket service is not running");
                 return;
             }
 
             try
             {
-                _logger.Info("停止Socket服务...");
+                _logger.Info("Stopping Socket service...");
                 _isRunning = false;
 
                 _listener?.Stop();
                 _listener = null;
-                _logger.Info("TcpListener已停止");
+                _logger.Info("TcpListener stopped");
 
                 if(_listenerThread!=null && _listenerThread.IsAlive)
                 {
-                    _logger.Info("等待监听线程结束...");
+                    _logger.Info("Waiting for listener thread to end...");
                     _listenerThread.Join(1000);
-                    _logger.Info("监听线程已结束");
+                    _logger.Info("Listener thread ended");
                 }
-                _logger.Info("Socket服务已完全停止");
+                _logger.Info("Socket service completely stopped");
             }
             catch (Exception ex)
             {
-                _logger.Error($"停止Socket服务时发生错误: {ex.Message}");
+                _logger.Error($"Error occurred while stopping Socket service: {ex.Message}");
             }
         }
 
         private void ListenForClients()
         {
-            _logger.Info("开始监听客户端连接...");
+            _logger.Info("Starting to listen for client connections...");
             try
             {
                 while (_isRunning)
                 {
-                    _logger.Info("等待客户端连接...");
+                    _logger.Info("Waiting for client connection...");
                     TcpClient client = _listener.AcceptTcpClient();
-                    _logger.Info($"接受到客户端连接: {client.Client.RemoteEndPoint}");
+                    _logger.Info($"Accepted client connection: {client.Client.RemoteEndPoint}");
 
                     Thread clientThread = new Thread(HandleClientCommunication)
                     {
                         IsBackground = true
                     };
                     clientThread.Start(client);
-                    _logger.Info("客户端处理线程已启动");
+                    _logger.Info("Client handling thread started");
                 }
             }
             catch (SocketException ex)
             {
-                _logger.Warning($"Socket异常: {ex.Message}");
+                _logger.Warning($"Socket exception: {ex.Message}");
             }
             catch(Exception ex)
             {
-                _logger.Error($"监听客户端时发生错误: {ex.Message}");
+                _logger.Error($"Error occurred while listening for clients: {ex.Message}");
             }
-            _logger.Info("停止监听客户端连接");
+            _logger.Info("Stopped listening for client connections");
         }
 
         private void HandleClientCommunication(object clientObj)
@@ -197,7 +197,7 @@ namespace revit_mcp_plugin.Core
             TcpClient tcpClient = (TcpClient)clientObj;
             NetworkStream stream = tcpClient.GetStream();
             
-            _logger.Info("新客户端连接已建立");
+            _logger.Info("New client connection established");
 
             try
             {
@@ -205,37 +205,37 @@ namespace revit_mcp_plugin.Core
 
                 while (_isRunning && tcpClient.Connected)
                 {
-                    // 读取客户端消息
+                    // Read client message
                     int bytesRead = 0;
 
                     try
                     {
-                        _logger.Info("等待客户端消息...");
+                        _logger.Info("Waiting for client message...");
                         bytesRead = stream.Read(buffer, 0, buffer.Length);
-                        _logger.Info($"读取到 {bytesRead} 字节数据");
+                        _logger.Info($"Read {bytesRead} bytes of data");
                     }
                     catch (IOException ex)
                     {
-                        _logger.Warning($"客户端连接中断: {ex.Message}");
+                        _logger.Warning($"Client connection interrupted: {ex.Message}");
                         break;
                     }
 
                     if (bytesRead == 0)
                     {
-                        _logger.Info("客户端断开连接 (0 字节)");
+                        _logger.Info("Client disconnected (0 bytes)");
                         break;
                     }
 
                     string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    _logger.Info($"收到消息: {message}");
+                    _logger.Info($"Received message: {message}");
 
                     string response = ProcessJsonRPCRequest(message);
-                    _logger.Info($"生成响应: {response}");
+                    _logger.Info($"Generated response: {response}");
 
-                    // 发送响应
+                    // Send response
                     byte[] responseData = Encoding.UTF8.GetBytes(response);
                     stream.Write(responseData, 0, responseData.Length);
-                    _logger.Info("响应已发送");
+                    _logger.Info("Response sent");
                 }
             }
             catch(Exception)
@@ -250,19 +250,19 @@ namespace revit_mcp_plugin.Core
 
         private string ProcessJsonRPCRequest(string requestJson)
         {
-            _logger.Info("开始处理JSON-RPC请求");
+            _logger.Info("Starting to process JSON-RPC request");
             JsonRPCRequest request;
 
             try
             {
-                _logger.Info("解析JSON-RPC请求...");
-                // 解析JSON-RPC请求
+                _logger.Info("Parsing JSON-RPC request...");
+                // Parse JSON-RPC request
                 request = JsonConvert.DeserializeObject<JsonRPCRequest>(requestJson);
 
-                // 验证请求格式是否有效
+                // Validate if request format is valid
                 if (request == null || !request.IsValid())
                 {
-                    _logger.Warning("无效的JSON-RPC请求格式");
+                    _logger.Warning("Invalid JSON-RPC request format");
                     return CreateErrorResponse(
                         null,
                         JsonRPCErrorCodes.InvalidRequest,
@@ -270,36 +270,36 @@ namespace revit_mcp_plugin.Core
                     );
                 }
 
-                _logger.Info($"请求方法: {request.Method}, ID: {request.Id}");
+                _logger.Info($"Request method: {request.Method}, ID: {request.Id}");
 
-                // 查找命令
+                // Find command
                 if (!_commandRegistry.TryGetCommand(request.Method, out var command))
                 {
-                    _logger.Warning($"未找到命令: {request.Method}");
+                    _logger.Warning($"Command not found: {request.Method}");
                     return CreateErrorResponse(request.Id, JsonRPCErrorCodes.MethodNotFound,
                         $"Method '{request.Method}' not found");
                 }
 
-                _logger.Info($"找到命令: {request.Method}, 开始执行...");
+                _logger.Info($"Found command: {request.Method}, starting execution...");
 
-                // 执行命令
+                // Execute command
                 try
                 {                
                     object result = command.Execute(request.GetParamsObject(), request.Id);
-                    _logger.Info($"命令执行成功: {request.Method}");
+                    _logger.Info($"Command executed successfully: {request.Method}");
 
                     return CreateSuccessResponse(request.Id, result);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"命令执行失败: {request.Method}, 错误: {ex.Message}");
+                    _logger.Error($"Command execution failed: {request.Method}, error: {ex.Message}");
                     return CreateErrorResponse(request.Id, JsonRPCErrorCodes.InternalError, ex.Message);
                 }
             }
             catch (JsonException ex)
             {
-                _logger.Error($"JSON解析错误: {ex.Message}");
-                // JSON解析错误
+                _logger.Error($"JSON parsing error: {ex.Message}");
+                // JSON parsing error
                 return CreateErrorResponse(
                     null,
                     JsonRPCErrorCodes.ParseError,
@@ -308,8 +308,8 @@ namespace revit_mcp_plugin.Core
             }
             catch (Exception ex)
             {
-                _logger.Error($"处理请求时发生错误: {ex.Message}");
-                // 处理请求时的其他错误
+                _logger.Error($"Error occurred while processing request: {ex.Message}");
+                // Other errors when processing request
                 return CreateErrorResponse(
                     null,
                     JsonRPCErrorCodes.InternalError,

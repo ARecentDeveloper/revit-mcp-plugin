@@ -8,30 +8,30 @@ using System.Threading.Tasks;
 namespace revit_mcp_plugin.Configuration
 {
     /// <summary>
-    /// 开发者信息
+    /// Developer information
     /// </summary>
     public class DeveloperInfo
     {
         /// <summary>
-        /// 开发者名称
+        /// Developer name
         /// </summary>
         [JsonProperty("name")]
         public string Name { get; set; } = "";
 
         /// <summary>
-        /// 开发者邮箱
+        /// Developer email
         /// </summary>
         [JsonProperty("email")]
         public string Email { get; set; } = "";
 
         /// <summary>
-        /// 开发者网站
+        /// Developer website
         /// </summary>
         [JsonProperty("website")]
         public string Website { get; set; } = "";
 
         /// <summary>
-        /// 开发者组织
+        /// Developer organization
         /// </summary>
         [JsonProperty("organization")]
         public string Organization { get; set; } = "";

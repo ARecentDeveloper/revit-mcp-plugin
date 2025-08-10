@@ -3,7 +3,7 @@
 namespace SampleCommandSet.Models
 {
     /// <summary>
-    /// 点坐标
+    /// Point coordinates
     /// </summary>
     public class Point
     {

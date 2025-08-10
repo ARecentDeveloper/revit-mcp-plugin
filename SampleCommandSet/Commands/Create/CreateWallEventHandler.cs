@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 namespace SampleCommandSet.Commands.Create
 {
     /// <summary>
-    /// 创建墙的外部事件处理器
+    /// External event handler for creating a wall
     /// </summary>
     public class CreateWallEventHandler : IExternalEventHandler, IWaitableExternalEventHandler
     {
-        // 创建墙的参数
+        // Parameters for creating the wall
         private double _startX;
         private double _startY;
         private double _endX;
@@ -24,18 +24,18 @@ namespace SampleCommandSet.Commands.Create
         private double _height;
         private double _thickness;
 
-        // 创建的墙体信息
+        // Information of the created wall
         private Wall _createdWall;
         public WallInfo CreatedWallInfo { get; private set; }
 
-        // 标记操作是否完成
+        // Flag indicating whether the operation has completed
         private bool _taskCompleted;
 
-        // 事件等待对象
+        // Event wait handle
         private readonly ManualResetEvent _resetEvent = new ManualResetEvent(false);
 
         /// <summary>
-        /// 设置创建墙的参数
+        /// Set parameters for creating the wall
         /// </summary>
         public void SetWallParameters(double startX, double startY, double endX, double endY, double height, double thickness)
         {
@@ -51,17 +51,17 @@ namespace SampleCommandSet.Commands.Create
         }
 
         /// <summary>
-        /// 等待墙创建完成
+        /// Wait for wall creation to complete
         /// </summary>
-        /// <param name="timeoutMilliseconds">超时时间（毫秒）</param>
-        /// <returns>操作是否在超时前完成</returns>
+        /// <param name="timeoutMilliseconds">Timeout in milliseconds</param>
+        /// <returns>Whether the operation completed before timeout</returns>
         public bool WaitForCompletion(int timeoutMilliseconds = 10000)
         {
             return _resetEvent.WaitOne(timeoutMilliseconds);
         }
 
         /// <summary>
-        /// IExternalEventHandler.Execute 实现
+        /// IExternalEventHandler.Execute implementation
         /// </summary>
         public void Execute(UIApplication app)
         {
@@ -69,36 +69,40 @@ namespace SampleCommandSet.Commands.Create
             {
                 Document doc = app.ActiveUIDocument.Document;
 
-                using (Transaction trans = new Transaction(doc, "创建墙体"))
+                using (Transaction trans = new Transaction(doc, "Create Wall"))
                 {
                     trans.Start();
 
-                    // 创建墙的起点和终点
+                    // Define start and end points for the wall
                     XYZ startPoint = new XYZ(_startX, _startY, 0);
                     XYZ endPoint = new XYZ(_endX, _endY, 0);
 
-                    // 创建墙的曲线
+                    // Create the wall curve
                     Line curve = Line.CreateBound(startPoint, endPoint);
 
-                    // 获取当前文档中的墙类型
-                    FilteredElementCollector collector = new FilteredElementCollector(doc);
-                    collector.OfClass(typeof(WallType));
-                    WallType wallType = collector.FirstOrDefault(w => w.Name.Contains("常规")) as WallType;
+                    // Get a wall type from the current document (prefer a "Generic" type if available)
+                    var allWallTypes = new FilteredElementCollector(doc)
+                        .OfClass(typeof(WallType))
+                        .Cast<WallType>()
+                        .ToList();
+                    WallType wallType = allWallTypes
+                        .FirstOrDefault(w => w.Name.IndexOf("Generic", StringComparison.OrdinalIgnoreCase) >= 0)
+                        ?? allWallTypes.FirstOrDefault();
 
-                    // 创建墙
+                    // Create the wall
                     _createdWall = Wall.Create(
                         doc,
                         curve,
                         wallType.Id,
                         doc.ActiveView.GenLevel.Id,
                         _height,
-                        0.0,  // 墙基点偏移
-                        false,  // 不翻转
-                        false); // 不是结构墙
+                        0.0,  // Base offset
+                        false,  // Do not flip
+                        false); // Not a structural wall
 
                     trans.Commit();
 
-                    // 获取墙的详细信息
+                    // Get wall details
                     CreatedWallInfo = new WallInfo
                     {
                         ElementId = _createdWall.Id.IntegerValue,
@@ -111,22 +115,22 @@ namespace SampleCommandSet.Commands.Create
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("错误", $"创建墙体时出错: {ex.Message}");
+                TaskDialog.Show("Error", $"Failed to create wall: {ex.Message}");
 
             }
             finally
             {
                 _taskCompleted = true;
-                _resetEvent.Set(); // 通知等待线程操作已完成
+                _resetEvent.Set(); // Notify waiting thread that the operation has completed
             }
         }
 
         /// <summary>
-        /// IExternalEventHandler.GetName 实现
+        /// IExternalEventHandler.GetName implementation
         /// </summary>
         public string GetName()
         {
-            return "创建墙体";
+            return "Create Wall";
         }
     }
 }

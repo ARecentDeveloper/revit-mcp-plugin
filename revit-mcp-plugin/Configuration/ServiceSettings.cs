@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 namespace revit_mcp_plugin.Configuration
 {
     /// <summary>
-    /// 服务设置类
+    /// Service settings class
     /// </summary>
     public class ServiceSettings
     {
         /// <summary>
-        /// 日志级别
+        /// Log level
         /// </summary>
         [JsonProperty("logLevel")]
         public string LogLevel { get; set; } = "Info";
 
         /// <summary>
-        /// socket服务端口
+        /// Socket service port
         /// </summary>
         [JsonProperty("port")]
         public int Port { get; set; } = 8080;

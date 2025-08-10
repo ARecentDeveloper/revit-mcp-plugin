@@ -9,14 +9,14 @@ namespace SampleCommandSet.Commands.Access
 {
     public class GetCurrentViewInfoEventHandler: IExternalEventHandler, IWaitableExternalEventHandler
     {
-        // 执行结果
+        // Execution result
         public ViewInfo ResultInfo { get; private set; }
 
-        // 状态同步对象
+        // State synchronization object
         public bool TaskCompleted { get; private set; }
         private readonly ManualResetEvent _resetEvent = new ManualResetEvent(false);
 
-        // 实现IWaitableExternalEventHandler接口
+        // Implement IWaitableExternalEventHandler interface
         public bool WaitForCompletion(int timeoutMilliseconds = 10000)
         {
             return _resetEvent.WaitOne(timeoutMilliseconds);
@@ -43,7 +43,7 @@ namespace SampleCommandSet.Commands.Access
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("error", "获取信息失败");
+                TaskDialog.Show("error", "Failed to get information");
             }
             finally
             {
@@ -54,7 +54,7 @@ namespace SampleCommandSet.Commands.Access
 
         public string GetName()
         {
-            return "获取当前视图信息";
+            return "Get Current View Information";
         }
     }
 }

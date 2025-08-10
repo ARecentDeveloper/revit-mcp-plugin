@@ -6,19 +6,19 @@ using Newtonsoft.Json.Linq;
 namespace SampleCommandSet.Commands.Create
 {
     /// <summary>
-    /// 创建墙命令
+    /// Command to create a wall
     /// </summary>
     public class CreateWallCommand : ExternalEventCommandBase
     {
         private CreateWallEventHandler _handler => (CreateWallEventHandler)Handler;
 
         /// <summary>
-        /// 命令名称
+        /// Command name
         /// </summary>
         public override string CommandName => "create_Wall";
 
         /// <summary>
-        /// 构造函数
+        /// Constructor
         /// </summary>
         /// <param name="uiApp">Revit UIApplication</param>
         public CreateWallCommand(UIApplication uiApp)
@@ -27,16 +27,16 @@ namespace SampleCommandSet.Commands.Create
         }
 
         /// <summary>
-        /// 执行命令
+        /// Execute command
         /// </summary>
-        /// <param name="parameters">JSON参数</param>
-        /// <param name="requestId">请求ID</param>
-        /// <returns>命令执行结果</returns>
+        /// <param name="parameters">JSON parameters</param>
+        /// <param name="requestId">Request ID</param>
+        /// <returns>Command execution result</returns>
         public override object Execute(JObject parameters, string requestId)
         {
             try
             {
-                // 解析墙参数
+                // Parse wall parameters
                 double startX = parameters["startX"].Value<double>();
                 double startY = parameters["startY"].Value<double>();
                 double endX = parameters["endX"].Value<double>();
@@ -44,22 +44,22 @@ namespace SampleCommandSet.Commands.Create
                 double height = parameters["height"].Value<double>();
                 double thickness = parameters["thickness"].Value<double>();
 
-                // 设置墙体参数
+                // Set wall parameters
                 _handler.SetWallParameters(startX, startY, endX, endY, height, thickness);
 
-                // 触发外部事件并等待完成
+                // Trigger external event and wait for completion
                 if (RaiseAndWaitForCompletion(10000))
                 {
                     return _handler.CreatedWallInfo;
                 }
                 else
                 {
-                    throw new TimeoutException("创建墙体操作超时");
+                    throw new TimeoutException("Timeout creating wall");
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"创建墙体失败: {ex.Message}");
+                throw new Exception($"Failed to create wall: {ex.Message}");
             }
         }
     }

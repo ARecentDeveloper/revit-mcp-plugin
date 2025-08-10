@@ -8,42 +8,42 @@ using System.Threading.Tasks;
 namespace revit_mcp_plugin.Configuration
 {
     /// <summary>
-    /// 命令配置类
+    /// Command configuration class
     /// </summary>
     public class CommandConfig
     {
         /// <summary>
-        /// 命令名称 - 对应IRevitCommand.CommandName
+        /// Command name - corresponds to IRevitCommand.CommandName
         /// </summary>
         [JsonProperty("commandName")]
         public string CommandName { get; set; }
 
         /// <summary>
-        /// 程序集路径 - 包含此命令的DLL
+        /// Assembly path - DLL containing this command
         /// </summary>
         [JsonProperty("assemblyPath")]
         public string AssemblyPath { get; set; }
 
         /// <summary>
-        /// 是否启用该命令
+        /// Whether this command is enabled
         /// </summary>
         [JsonProperty("enabled")]
         public bool Enabled { get; set; } = true;
 
         /// <summary>
-        /// 支持的Revit版本
+        /// Supported Revit versions
         /// </summary>
         [JsonProperty("supportedRevitVersions")]
         public string[] SupportedRevitVersions { get; set; } = new string[0];
 
         /// <summary>
-        /// 开发者信息
+        /// Developer information
         /// </summary>
         [JsonProperty("developer")]
         public DeveloperInfo Developer { get; set; } = new DeveloperInfo();
 
         /// <summary>
-        /// 命令描述
+        /// Command description
         /// </summary>
         [JsonProperty("description")]
         public string Description { get; set; } = "";

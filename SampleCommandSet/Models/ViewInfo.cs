@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace SampleCommandSet.Models
 {
     /// <summary>
-    /// 视图信息数据结构
+    /// View information data structure
     /// </summary>
     public class ViewInfo
     {

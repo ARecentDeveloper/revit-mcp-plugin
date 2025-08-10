@@ -12,7 +12,7 @@ namespace revit_mcp_plugin.Core
         {
             try
             {
-                // 获取socket服务
+                // Get socket service
                 SocketService service = SocketService.Instance;
 
                 // Debug: Log current state
@@ -21,13 +21,13 @@ namespace revit_mcp_plugin.Core
 
                 if (service.IsRunning)
                 {
-                    logger.Info("MCPServiceConnection: 调用 Stop()");
+                    logger.Info("MCPServiceConnection: Calling Stop()");
                     service.Stop();
                     TaskDialog.Show("revitMCP", "Close Server");
                 }
                 else
                 {
-                    logger.Info("MCPServiceConnection: 调用 Initialize() 和 Start()");
+                    logger.Info("MCPServiceConnection: Calling Initialize() and Start()");
                     service.Initialize(commandData.Application);
                     service.Start();
                     TaskDialog.Show("revitMCP", "Open Server");

@@ -8,18 +8,18 @@ using System.Threading.Tasks;
 namespace revit_mcp_plugin.Configuration
 {
     /// <summary>
-    /// 框架配置类
+    /// Framework configuration class
     /// </summary>
     public class FrameworkConfig
     {
         /// <summary>
-        /// 命令配置列表
+        /// Command configuration list
         /// </summary>
         [JsonProperty("commands")]
         public List<CommandConfig> Commands { get; set; } = new List<CommandConfig>();
 
         /// <summary>
-        /// 全局设置
+        /// Global settings
         /// </summary>
         [JsonProperty("settings")]
         public ServiceSettings Settings { get; set; } = new ServiceSettings();

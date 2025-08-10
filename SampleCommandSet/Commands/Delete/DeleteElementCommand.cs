@@ -19,17 +19,17 @@ namespace SampleCommandSet.Commands.Delete
         {
             try
             {
-                // 解析数组参数
+                // Parse array parameters
                 var elementIds = parameters?["elementIds"]?.ToObject<string[]>();
                 if (elementIds == null || elementIds.Length == 0)
                 {
                     throw new CommandExecutionException(
-                        "元素ID列表不能为空",
+                        "Element ID list cannot be empty",
                         JsonRPCErrorCodes.InvalidParams);
                 }
-                // 设置要删除的元素ID数组
+                // Set the array of element IDs to delete
                 _handler.ElementIds = elementIds;
-                // 触发外部事件并等待完成
+                // Trigger external event and wait for completion
                 if (RaiseAndWaitForCompletion(15000))
                 {
                     if (_handler.IsSuccess)
@@ -39,7 +39,7 @@ namespace SampleCommandSet.Commands.Delete
                     else
                     {
                         throw new CommandExecutionException(
-                            "删除元素失败",
+                            "Failed to delete elements",
                             JsonRPCErrorCodes.ElementDeletionFailed);
                     }
                 }
@@ -55,7 +55,7 @@ namespace SampleCommandSet.Commands.Delete
             catch (Exception ex)
             {
                 throw new CommandExecutionException(
-                    $"删除元素失败: {ex.Message}",
+                    $"Failed to delete elements: {ex.Message}",
                     JsonRPCErrorCodes.InternalError);
             }
         }

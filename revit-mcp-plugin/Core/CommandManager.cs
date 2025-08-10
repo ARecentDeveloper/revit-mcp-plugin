@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace revit_mcp_plugin.Core
 {
     /// <summary>
-    /// 命令管理器，负责加载和管理命令
+    /// Command manager responsible for loading and managing commands
     /// </summary>
     public class CommandManager
     {
@@ -38,80 +38,80 @@ namespace revit_mcp_plugin.Core
         }
 
         /// <summary>
-        /// 加载配置文件中指定的所有命令
+        /// Load all commands specified in configuration file
         /// </summary>
         public void LoadCommands()
         {
-            _logger.Info("开始加载命令");
+            _logger.Info("Starting to load commands");
             string currentVersion = _versionAdapter.GetRevitVersion();
-            _logger.Info("当前 Revit 版本: {0}", currentVersion);
+            _logger.Info("Current Revit version: {0}", currentVersion);
 
-            // 从配置加载外部命令
+            // Load external commands from configuration
             foreach (var commandConfig in _configManager.Config.Commands)
             {
                 try
                 {
                     if (!commandConfig.Enabled)
                     {
-                        _logger.Info("跳过禁用的命令: {0}", commandConfig.CommandName);
+                        _logger.Info("Skipping disabled command: {0}", commandConfig.CommandName);
                         continue;
                     }
 
-                    // 检查版本兼容性
+                    // Check version compatibility
                     if (commandConfig.SupportedRevitVersions != null &&
                         commandConfig.SupportedRevitVersions.Length > 0 &&
                         !_versionAdapter.IsVersionSupported(commandConfig.SupportedRevitVersions))
                     {
-                        _logger.Warning("命令 {0} 不支持当前 Revit 版本 {1}，已跳过",
+                        _logger.Warning("Command {0} does not support current Revit version {1}, skipped",
                             commandConfig.CommandName, currentVersion);
                         continue;
                     }
 
-                    // 替换路径中的版本占位符
+                    // Replace version placeholder in path
                     commandConfig.AssemblyPath = commandConfig.AssemblyPath.Contains("{VERSION}")
                         ? commandConfig.AssemblyPath.Replace("{VERSION}", currentVersion)
                         : commandConfig.AssemblyPath;
 
-                    // 加载外部命令程序集
+                    // Load external command assembly
                     LoadCommandFromAssembly(commandConfig);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error("加载命令 {0} 失败: {1}", commandConfig.CommandName, ex.Message);
+                    _logger.Error("Failed to load command {0}: {1}", commandConfig.CommandName, ex.Message);
                 }
             }
 
-            _logger.Info("命令加载完成");
+            _logger.Info("Command loading completed");
         }
 
         /// <summary>
-        /// 加载特定程序集中的特定命令
+        /// Load specific command from specific assembly
         /// </summary>
-        /// <param name="commandName">命令名称</param>
-        /// <param name="assemblyPath">程序集路径</param>
+        /// <param name="commandName">Command name</param>
+        /// <param name="assemblyPath">Assembly path</param>
         private void LoadCommandFromAssembly(CommandConfig config)
         {
             try
             {
-                // 确定程序集路径
+                // Determine assembly path
                 string assemblyPath = config.AssemblyPath;
                 if (!Path.IsPathRooted(assemblyPath))
                 {
-                    // 如果不是绝对路径，则相对于Commands目录
+                    // If not absolute path, relative to Commands directory
                     string baseDir = PathManager.GetCommandsDirectoryPath();
                     assemblyPath = Path.Combine(baseDir, assemblyPath);
                 }
 
                 if (!File.Exists(assemblyPath))
                 {
-                    _logger.Error("命令程序集不存在: {0}", assemblyPath);
+                    _logger.Error("Command assembly does not exist: {0}", assemblyPath);
                     return;
                 }
 
-                // 加载程序集
+                // Load assembly
                 Assembly assembly = Assembly.LoadFrom(assemblyPath);
 
-                // 查找实现 IRevitCommand 接口的类型
+                // Find types that implement IRevitCommand interface
                 foreach (Type type in assembly.GetTypes())
                 {
                     if (typeof(RevitMCPSDK.API.Interfaces.IRevitCommand).IsAssignableFrom(type) &&
@@ -120,19 +120,19 @@ namespace revit_mcp_plugin.Core
                     {
                         try
                         {
-                            // 创建命令实例
+                            // Create command instance
                             RevitMCPSDK.API.Interfaces.IRevitCommand command;
 
-                            // 检查命令是否实现了可初始化接口
+                            // Check if command implements initializable interface
                             if (typeof(IRevitCommandInitializable).IsAssignableFrom(type))
                             {
-                                // 创建实例并初始化
+                                // Create instance and initialize
                                 command = (IRevitCommand)Activator.CreateInstance(type);
                                 ((IRevitCommandInitializable)command).Initialize(_uiApplication);
                             }
                             else
                             {
-                                // 尝试查找接受 UIApplication 的构造函数
+                                // Try to find constructor that accepts UIApplication
                                 var constructor = type.GetConstructor(new[] { typeof(UIApplication) });
                                 if (constructor != null)
                                 {
@@ -140,30 +140,30 @@ namespace revit_mcp_plugin.Core
                                 }
                                 else
                                 {
-                                    // 使用无参构造函数
+                                    // Use parameterless constructor
                                     command = (IRevitCommand)Activator.CreateInstance(type);
                                 }
                             }
 
-                            // 检查命令名称是否与配置匹配
+                            // Check if command name matches configuration
                             if (command.CommandName == config.CommandName)
                             {
                                 _commandRegistry.RegisterCommand(command);
-                                _logger.Info("已注册外部命令: {0} (来自 {1})",
+                                _logger.Info("Registered external command: {0} (from {1})",
                                     command.CommandName, Path.GetFileName(assemblyPath));
-                                break; // 找到匹配的命令后退出循环
+                                break; // Exit loop after finding matching command
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error("创建命令实例失败 [{0}]: {1}", type.FullName, ex.Message);
+                            _logger.Error("Failed to create command instance [{0}]: {1}", type.FullName, ex.Message);
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error("加载命令程序集失败: {0}", ex.Message);
+                _logger.Error("Failed to load command assembly: {0}", ex.Message);
             }
         }
     }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace revit_mcp_plugin.Core
 {
     /// <summary>
-    /// 管理外部事件的创建和生命周期
+    /// Manages creation and lifecycle of external events
     /// </summary>
     public class ExternalEventManager
     {
@@ -40,21 +40,21 @@ namespace revit_mcp_plugin.Core
         }
 
         /// <summary>
-        /// 获取或创建外部事件
+        /// Get or create external event
         /// </summary>
         public ExternalEvent GetOrCreateEvent(IWaitableExternalEventHandler handler, string key)
         {
             if (!_isInitialized)
-                throw new InvalidOperationException("ExternalEventManager 尚未初始化");
+                throw new InvalidOperationException("ExternalEventManager not yet initialized");
 
-            // 如果存在且处理器匹配，直接返回
+            // If exists and handler matches, return directly
             if (_events.TryGetValue(key, out var wrapper) &&
                 wrapper.Handler == handler)
             {
                 return wrapper.Event;
             }
 
-            // 直接创建外部事件 - 这应该在主线程中工作
+            // Create external event directly - this should work in main thread
             ExternalEvent externalEvent = null;
             
             try
@@ -63,27 +63,27 @@ namespace revit_mcp_plugin.Core
             }
             catch (Exception ex)
             {
-                _logger.Error($"创建外部事件失败: {ex.Message}");
-                throw new InvalidOperationException($"无法创建外部事件: {ex.Message}");
+                _logger.Error($"Failed to create external event: {ex.Message}");
+                throw new InvalidOperationException($"Unable to create external event: {ex.Message}");
             }
 
             if (externalEvent == null)
-                throw new InvalidOperationException("无法创建外部事件");
+                throw new InvalidOperationException("Unable to create external event");
 
-            // 存储事件
+            // Store event
             _events[key] = new ExternalEventWrapper
             {
                 Event = externalEvent,
                 Handler = handler
             };
 
-            _logger.Info($"为 {key} 创建了新的外部事件");
+            _logger.Info($"Created new external event for {key}");
 
             return externalEvent;
         }
 
         /// <summary>
-        /// 清除事件缓存
+        /// Clear event cache
         /// </summary>
         public void ClearEvents()
         {

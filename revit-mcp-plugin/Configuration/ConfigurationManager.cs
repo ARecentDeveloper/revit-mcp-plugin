@@ -17,12 +17,12 @@ namespace revit_mcp_plugin.Configuration
         {
             _logger = logger;
 
-            // 配置文件路径
+            // Configuration file path
             _configPath = PathManager.GetCommandRegistryFilePath();
         }
 
         /// <summary>
-        /// 加载配置
+        /// Load configuration
         /// </summary>
         public void LoadConfiguration()
         {
@@ -32,29 +32,29 @@ namespace revit_mcp_plugin.Configuration
                 {
                     string json = File.ReadAllText(_configPath);
                     Config = JsonConvert.DeserializeObject<FrameworkConfig>(json);
-                    _logger.Info("已加载配置文件: {0}", _configPath);
+                    _logger.Info("Configuration file loaded: {0}", _configPath);
                 }
                 else
                 {
-                    _logger.Error("未找到配置文件");
+                    _logger.Error("Configuration file not found");
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error("加载配置文件失败: {0}", ex.Message);
+                _logger.Error("Failed to load configuration file: {0}", ex.Message);
             }
 
-            // 记录加载时间
+            // Record load time
             _lastConfigLoadTime = DateTime.Now;
         }
 
         ///// <summary>
-        ///// 重新加载配置
+        ///// Reload configuration
         ///// </summary>
         //public void RefreshConfiguration()
         //{
         //    LoadConfiguration();
-        //    _logger.Info("配置已重新加载");
+        //    _logger.Info("Configuration reloaded");
         //}
 
         //public bool HasConfigChanged()
